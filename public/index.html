@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fellowship Register</title>
+<link rel="icon" type="image/png" href="/images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#20261c;
+    --ink-soft:#3a4233;
+    --paper:darkgray;
+    --paper-raised:#f7f1e2;
+    --paper-dark:#e3d8ba;
+    --brass:#b8863c;
+    --brass-dark:#8f6a2c;
+    --sage:#5c7857;
+    --sage-deep:#3f5a3b;
+    --rule:#c7bc9c;
+    --red-ink:#9c3b2e;
+    --white:#fbf9f2;
+    --shadow: 0 1px 0 rgba(32,38,28,0.06), 0 8px 20px -12px rgba(32,38,28,0.35);
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(255,255,255,0.35), transparent 60%),
+      radial-gradient(900px 500px at 100% 110%, rgba(184,134,60,0.10), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+  }
+
+  .app{ max-width:1000px; margin:0 auto; padding:28px 20px 80px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:20px; padding-bottom:18px; margin-bottom:10px;
+    border-bottom:3px double var(--brass-dark);
+    flex-wrap:wrap;
+  }
+  .mark{ display:flex; align-items:baseline; gap:12px; }
+  .mark .glyph{
+    width:38px; height:38px; border-radius:50%;
+    border:2px solid var(--brass-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:18px;
+    color:var(--brass-dark); background:var(--paper-raised);
+    flex:none;
+  }
+  .mark .logo{
+    width:64px; height:64px; flex:none; object-fit:contain;
+    align-self:center;
+  }
+  @media (max-width:520px){ .mark .logo{ width:48px; height:48px; } }
+  .mark h1{
+    font-family:var(--font-display); font-weight:600; font-size:clamp(24px,4vw,34px);
+    margin:0; letter-spacing:0.2px;
+  }
+  .mark p{
+    margin:2px 0 0; font-size:12.5px; letter-spacing:0.4px; text-transform:uppercase;
+    color:var(--ink-soft); font-weight:500;
+  }
+  .masthead-right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .today-stamp{
+    font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);
+    text-align:right; line-height:1.5;
+  }
+  .today-stamp b{ color:var(--ink); font-size:14px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{ display:flex; gap:6px; margin:22px 0 0; flex-wrap:wrap; }
+  .tab{
+    font-family:var(--font-body); font-weight:600; font-size:13.5px;
+    padding:10px 18px 9px; cursor:pointer; border:none;
+    background:var(--paper-dark); color:var(--ink-soft);
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    letter-spacing:0.3px;
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+  }
+  .tab:hover{ transform:translateY(-1px); }
+  .tab.active{ background:var(--ink); color:var(--white); }
+  .tab:focus-visible{ outline:2px solid var(--sage-deep); outline-offset:2px; }
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--rule);
+    box-shadow:var(--shadow);
+    padding:clamp(18px,4vw,34px);
+    margin-top:-1px;
+  }
+  .hidden{ display:none !important; }
+
+  h2.section-title{
+    font-family:var(--font-display); font-weight:600; font-size:22px;
+    margin:0 0 4px;
+  }
+  .section-sub{ margin:0 0 24px; color:var(--ink-soft); font-size:13.5px; }
+
+  /* ---------- Form & Inputs ---------- */
+  .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 18px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field.span-2{ grid-column:1 / -1; }
+  label{
+    font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;
+    color:var(--sage-deep);
+  }
+  input[type=text], input[type=tel], input[type=email], input[type=date], input[type=password], select, textarea{
+    font-family:var(--font-body); font-size:15px; color:var(--ink);
+    background:var(--white);
+    border:1px solid var(--rule);
+    border-bottom:2px solid var(--brass);
+    padding:10px 12px; border-radius:2px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color:var(--sage-deep);
+    box-shadow:0 0 0 3px rgba(95,120,87,0.18);
+  }
+  textarea{ resize:vertical; min-height:64px; font-size:14px; }
+
+  .btn{
+    font-family:var(--font-body); font-weight:700; font-size:14px;
+    padding:12px 22px; border:none; border-radius:2px; cursor:pointer;
+    letter-spacing:0.3px;
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  .btn-primary{ background:var(--sage-deep); color:var(--white); }
+  .btn-primary:hover{ background:var(--sage); transform:translateY(-1px); }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border:1px solid var(--rule); }
+  .btn-ghost:hover{ border-color:var(--brass-dark); color:var(--ink); }
+  .btn-danger{ background:var(--red-ink); color:var(--white); padding:6px 12px; font-size:12px; }
+  .btn-danger:hover{ background:#7a2e24; }
+
+  .form-actions{ margin-top:22px; display:flex; align-items:center; gap:14px; }
+  .form-msg{ font-size:13px; color:var(--sage-deep); font-weight:600; }
+  .error-msg{ font-size:13px; color:var(--red-ink); font-weight:600; }
+
+  /* ---------- Check-in ---------- */
+  .checkin-head{ display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+  .tally{
+    font-family:var(--font-mono); background:var(--ink); color:var(--white);
+    padding:10px 16px; border-radius:2px; font-size:14px; white-space:nowrap;
+  }
+  .tally b{ color:#e8d9ad; font-size:16px; }
+
+  .search-row{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .search-row input{ flex:1; min-width:200px; }
+
+  .visitor-row{
+    display:flex; gap:10px; margin-bottom:22px; padding:14px;
+    background:var(--paper); border:1px dashed var(--brass);
+    flex-wrap:wrap; align-items:center;
+  }
+  .visitor-row span{ font-size:12px; color:var(--ink-soft); font-weight:600; }
+  .visitor-row input{ flex:1; min-width:160px; }
+
+  .roster-list{ border-top:1px solid var(--rule); }
+  .roster-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 4px; border-bottom:1px solid var(--rule);
+    gap:12px; flex-wrap:wrap;
+  }
+  .roster-who{ display:flex; align-items:baseline; gap:10px; min-width:0; }
+  .roster-name{ font-weight:600; font-size:15px; }
+  .roster-group{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.4px;
+    color:var(--sage-deep); background:rgba(92,120,87,0.12);
+    padding:3px 8px; border-radius:10px; flex:none;
+  }
+  .roster-group.visitor{ color:var(--red-ink); background:rgba(156,59,46,0.12); }
+
+  .stamp-btn{
+    font-family:var(--font-body); font-weight:700; font-size:12.5px;
+    padding:8px 14px; border-radius:2px; cursor:pointer; flex:none;
+    border:1.5px solid var(--brass-dark); background:transparent; color:var(--brass-dark);
+    transition:transform .12s ease;
+  }
+  .stamp-btn.present{
+    background:var(--sage-deep); border-color:var(--sage-deep); color:var(--white);
+    animation: stamp .28s ease;
+  }
+  @keyframes stamp{
+    0%{ transform:scale(1.6) rotate(-8deg); opacity:0.4; }
+    60%{ transform:scale(0.94) rotate(2deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0); }
+  }
+
+  /* ---------- Ledger Table ---------- */
+  .ledger-controls{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .ledger-controls input{ flex:1; min-width:180px; }
+  .ledger-controls select{ min-width:150px; }
+
+  .ledger{
+    width:100%; border-collapse:collapse;
+    background-image: repeating-linear-gradient(
+      to bottom, transparent, transparent 43px, var(--rule) 43px, var(--rule) 44px
+    );
+  }
+  .ledger thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;
+    color:var(--brass-dark); padding:0 8px 10px; border-bottom:2px solid var(--brass-dark);
+    font-weight:700;
+  }
+  .ledger tbody td{ padding:0 8px; height:44px; font-size:14px; vertical-align:middle; }
+  .ledger tbody td.num{ font-family:var(--font-mono); text-align:right; }
+  .ledger tbody tr:hover{ background:rgba(184,134,60,0.06); }
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--ink-soft); }
+  .empty-state .glyph-lg{ font-size:34px; display:block; margin-bottom:10px; }
+
+  /* ---------- Pin Modal / Auth ---------- */
+  .auth-box{ max-width:380px; margin:40px auto 20px; text-align:center; }
+  .pin-input-group{ display:flex; gap:10px; margin-top:16px; justify-content:center; }
+  .pin-input-group input{ width:180px; text-align:center; font-size:20px; letter-spacing:4px; }
+
+  footer.note{ margin-top:22px; font-size:12px; color:var(--ink-soft); text-align:center; }
+
+  @media (max-width:640px){
+    .field-grid{ grid-template-columns:1fr; }
+    .roster-row{ flex-direction:column; align-items:flex-start; }
+    .ledger thead{ display:none; }
+    .ledger, .ledger tbody, .ledger tr, .ledger td{ display:block; width:100%; }
+    .ledger tbody tr{ padding:10px 0; border-bottom:1px solid var(--rule); }
+    .ledger tbody td{ height:auto; padding:2px 8px; }
+    .ledger tbody td.num::before{ content: attr(data-label) ": "; color:var(--ink-soft); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <div class="mark">
+      <img class="logo" src="/images/church-logo.png" alt="Karar church logo" width="64" height="64">
+      <div>
+        <h1>Karar Worship Team</h1>
+        <p>Membership &amp; attendance, kept simply</p>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="today-stamp">Today's date<br><b id="today-label">—</b></div>
+      <button class="btn btn-ghost hidden" id="logout-btn" style="padding:4px 10px; font-size:11px;">🔒 Lock Admin</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="checkin" role="tab">Check In</button>
+    <button class="tab" data-view="register" role="tab">Register Member (Admin)</button>
+    <button class="tab" data-view="roster" role="tab">Roster &amp; History (Admin)</button>
+  </nav>
+
+  <!-- CHECK IN (PUBLIC) -->
+  <section class="panel" id="view-checkin">
+    <div class="checkin-head">
+      <div>
+        <h2 class="section-title">Check in for <span id="checkin-date-label">today</span></h2>
+        <p class="section-sub" style="margin-bottom:0;">Tap a name to mark them present. Tap again to undo.</p>
+      </div>
+      <div class="tally"><b id="tally-present">0</b> / <span id="tally-total">0</span> present</div>
+    </div>
+
+    <div class="search-row">
+      <input type="text" id="checkin-search" placeholder="Search the register…">
+      <input type="date" id="checkin-date">
+    </div>
+
+    <div class="visitor-row">
+      <span>First-time visitor?</span>
+      <input type="text" id="visitor-name" placeholder="Their name">
+      <button class="btn btn-ghost" id="add-visitor-btn" type="button">Add &amp; check in</button>
+    </div>
+
+    <div class="roster-list" id="checkin-list"></div>
+  </section>
+
+  <!-- ADMIN AUTH PIN CHALLENGE -->
+  <section class="panel hidden" id="view-auth">
+    <div class="auth-box">
+      <h2 class="section-title">Admin Authentication</h2>
+      <p class="section-sub">Enter your 6-digit access PIN to unlock administrative features.</p>
+      <form id="pin-form">
+        <div class="pin-input-group">
+          <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric" placeholder="••••••" autofocus required>
+          <button type="submit" class="btn btn-primary">Unlock</button>
+        </div>
+        <p class="error-msg hidden" id="pin-error" style="margin-top:12px;">Incorrect PIN. Access denied.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- REGISTER (ADMIN ONLY) -->
+  <section class="panel hidden" id="view-register">
+    <h2 class="section-title">Add someone to the register</h2>
+    <p class="section-sub">Enter their details once — they'll show up in check-in from now on.</p>
+    <form id="register-form">
+      <div class="field-grid">
+        <div class="field span-2">
+          <label for="f-name">Full name</label>
+          <input type="text" id="f-name" required placeholder="e.g. Solomon Kassa">
+        </div>
+        <div class="field">
+          <label for="f-phone">Phone</label>
+          <input type="tel" id="f-phone">
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input type="email" id="f-email">
+        </div>
+        <div class="field">
+          <label for="f-group">Team / group</label>
+          <select id="f-group">
+            <option value="Worship">Worship Team</option>
+            <option value="Choir">Choir</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-joined">Date joined</label>
+          <input type="date" id="f-joined">
+        </div>
+        <div class="field span-2">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes" placeholder="(optional) e.g. family members, how they found the church"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add to register</button>
+        <span class="form-msg hidden" id="register-msg">Added — welcome them at check-in any time.</span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ROSTER (ADMIN ONLY) -->
+  <section class="panel hidden" id="view-roster">
+    <h2 class="section-title">Roster &amp; attendance history</h2>
+    <p class="section-sub">Everyone who has ever been registered, with how often they've been seen.</p>
+
+    <div class="ledger-controls">
+      <input type="text" id="roster-search" placeholder="Search by name…">
+      <select id="roster-group-filter">
+        <option value="">All groups</option>
+      </select>
+    </div>
+
+    <div id="roster-table-wrap"></div>
+  </section>
+
+  <footer class="note">Shared register — public check-in mode.</footer>
+</div>
+
+<script>
+(function(){
+  const STORE_MEMBERS = 'members';
+  const STORE_ATTENDANCE = 'attendance';
+
+  // SHA-256 hash of "199310" (security best practice: no raw PIN stored in script)
+  const ADMIN_PIN= "199310";
+  let isAdminAuthenticated = false;
+  let targetAdminView = null;
+
+  let members = [];
+  let attendance = {};
+
+  const todayStr = () => new Date().toISOString().slice(0,10);
+  const fmtDate = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  function uid(){ return 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7); }
+
+  // Hash helper function using browser Web Crypto API
+  async function hashPin(pin) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pin);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // ---------- Local Storage Fallback ----------
+  function getItem(key) {
+    try { return localStorage.getItem(key); } catch(e) { return null; }
+  }
+  function setItem(key, val) {
+    try { localStorage.setItem(key, val); } catch(e) {}
+  }
+
+  function loadAll(){
+    try {
+      const m = getItem(STORE_MEMBERS);
+      members = m ? JSON.parse(m) : [];
+    } catch(e) { members = []; }
+    try {
+      const a = getItem(STORE_ATTENDANCE);
+      attendance = a ? JSON.parse(a) : {};
+    } catch(e) { attendance = {}; }
+  }
+
+  function saveMembers(){ setItem(STORE_MEMBERS, JSON.stringify(members)); }
+  function saveAttendance(){ setItem(STORE_ATTENDANCE, JSON.stringify(attendance)); }
+
+  // ---------- View Controller & Navigation ----------
+  const tabs = document.querySelectorAll('.tab');
+  const views = {
+    checkin: document.getElementById('view-checkin'),
+    auth: document.getElementById('view-auth'),
+    register: document.getElementById('view-register'),
+    roster: document.getElementById('view-roster'),
+  };
+
+  function switchTab(viewName) {
+    if ((viewName === 'register' || viewName === 'roster') && !isAdminAuthenticated) {
+      targetAdminView = viewName;
+      showView('auth');
+      document.getElementById('pin-input').focus();
+      return;
+    }
+
+    showView(viewName);
+    if(viewName === 'roster') renderRoster();
+    if(viewName === 'checkin') renderCheckin();
+  }
+
+  function showView(viewName) {
+    Object.keys(views).forEach(v => views[v].classList.add('hidden'));
+    tabs.forEach(x => {
+      if (x.dataset.view === viewName || (views['auth'] && !views['auth'].classList.contains('hidden') && x.dataset.view === targetAdminView)) {
+        x.classList.add('active');
+      } else {
+        x.classList.remove('active');
+      }
+    });
+    views[viewName].classList.remove('hidden');
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.view)));
+
+  document.getElementById('today-label').textContent = fmtDate(todayStr());
+
+  // ---------- Admin Authentication PIN Logic ----------
+  const pinForm = document.getElementById('pin-form');
+  const pinInput = document.getElementById('pin-input');
+  const pinError = document.getElementById('pin-error');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  pinForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const enteredPin = pinInput.value.trim();
+    
+
+    if (enteredPin === ADMIN_PIN) {
+      isAdminAuthenticated = true;
+      pinError.classList.add('hidden');
+      pinInput.value = '';
+      logoutBtn.classList.remove('hidden');
+      switchTab(targetAdminView || 'register');
+    } else {
+      pinError.classList.remove('hidden');
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    isAdminAuthenticated = false;
+    logoutBtn.classList.add('hidden');
+    switchTab('checkin');
+  });
+
+  // ---------- Register form ----------
+  const form = document.getElementById('register-form');
+  document.getElementById('f-joined').value = todayStr();
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('f-name').value.trim();
+    if(!name) return;
+    const member = {
+      id: uid(),
+      name,
+      phone: document.getElementById('f-phone').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      group: document.getElementById('f-group').value,
+      joined: document.getElementById('f-joined').value || todayStr(),
+      notes: document.getElementById('f-notes').value.trim(),
+      visitor: false
+    };
+    members.push(member);
+    saveMembers();
+    form.reset();
+    document.getElementById('f-joined').value = todayStr();
+    const msg = document.getElementById('register-msg');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 3200);
+  });
+
+  // ---------- Check-in ----------
+  const checkinDate = document.getElementById('checkin-date');
+  checkinDate.value = todayStr();
+  checkinDate.addEventListener('change', renderCheckin);
+  document.getElementById('checkin-search').addEventListener('input', renderCheckin);
+
+  document.getElementById('add-visitor-btn').addEventListener('click', () => {
+    const input = document.getElementById('visitor-name');
+    const name = input.value.trim();
+    if(!name) return;
+    const member = { id: uid(), name, phone:'', email:'', group:'Visitor', joined: todayStr(), notes:'', visitor:true };
+    members.push(member);
+    saveMembers();
+    const date = checkinDate.value || todayStr();
+    attendance[date] = attendance[date] || [];
+    attendance[date].push(member.id);
+    saveAttendance();
+    input.value = '';
+    renderCheckin();
+  });
+
+  function togglePresent(memberId){
+    const date = checkinDate.value || todayStr();
+    attendance[date] = attendance[date] || [];
+    const idx = attendance[date].indexOf(memberId);
+    if(idx >= 0) attendance[date].splice(idx,1);
+    else attendance[date].push(memberId);
+    saveAttendance();
+    renderCheckin();
+  }
+
+  function deleteMember(memberId) {
+    if (!isAdminAuthenticated) return;
+    if (confirm("Are you sure you want to remove this member permanently?")) {
+      members = members.filter(m => m.id !== memberId);
+      Object.keys(attendance).forEach(d => {
+        attendance[d] = (attendance[d] || []).filter(id => id !== memberId);
+      });
+      saveMembers();
+      saveAttendance();
+      renderRoster();
+      renderCheckin();
+    }
+  }
+
+  function renderCheckin(){
+    document.getElementById('checkin-date-label').textContent = fmtDate(checkinDate.value || todayStr());
+    const date = checkinDate.value || todayStr();
+    const present = new Set(attendance[date] || []);
+    const q = document.getElementById('checkin-search').value.trim().toLowerCase();
+
+    document.getElementById('tally-present').textContent = present.size;
+    document.getElementById('tally-total').textContent = members.length;
+
+    const list = document.getElementById('checkin-list');
+    list.innerHTML = '';
+
+    if(members.length === 0){
+      list.innerHTML = '<div class="empty-state"><span class="glyph-lg">📖</span>No one is registered yet. Add members from the Register tab.</div>';
+      return;
+    }
+
+    const sorted = [...members]
+      .filter(m => m.name.toLowerCase().includes(q))
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    if(sorted.length === 0){
+      list.innerHTML = '<div class="empty-state">No one matches that search.</div>';
+      return;
+    }
+
+    sorted.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'roster-row';
+      const isPresent = present.has(m.id);
+      row.innerHTML = `
+        <div class="roster-who">
+          <span class="roster-name">${escapeHtml(m.name)}</span>
+          <span class="roster-group ${m.visitor ? 'visitor' : ''}">${escapeHtml(m.group)}</span>
+        </div>
+        <button class="stamp-btn ${isPresent ? 'present' : ''}" data-id="${m.id}">${isPresent ? '✓ Present' : 'Mark present'}</button>
+      `;
+      row.querySelector('.stamp-btn').addEventListener('click', () => togglePresent(m.id));
+      list.appendChild(row);
+    });
+  }
+
+  // ---------- Roster & History ----------
+  const rosterSearch = document.getElementById('roster-search');
+  const rosterGroupFilter = document.getElementById('roster-group-filter');
+  rosterSearch.addEventListener('input', renderRoster);
+  rosterGroupFilter.addEventListener('change', renderRoster);
+
+  function attendanceStatsFor(memberId){
+    let count = 0, lastSeen = null;
+    Object.keys(attendance).forEach(date => {
+      if((attendance[date] || []).includes(memberId)){
+        count++;
+        if(!lastSeen || date > lastSeen) lastSeen = date;
+      }
+    });
+    return { count, lastSeen };
+  }
+
+  function renderRoster(){
+    const wrap = document.getElementById('roster-table-wrap');
+    const groups = [...new Set(members.map(m => m.group))].sort();
+    const currentFilter = rosterGroupFilter.value;
+    rosterGroupFilter.innerHTML = '<option value="">All groups</option>' +
+      groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+    rosterGroupFilter.value = currentFilter;
+
+    if(members.length === 0){
+      wrap.innerHTML = '<div class="empty-state"><span class="glyph-lg">📖</span>The register is empty. Add your first member to begin the ledger.</div>';
+      return;
+    }
+
+    const q = rosterSearch.value.trim().toLowerCase();
+    const groupFilter = rosterGroupFilter.value;
+
+    const rows = members
+      .filter(m => m.name.toLowerCase().includes(q))
+      .filter(m => !groupFilter || m.group === groupFilter)
+      .map(m => ({ m, ...attendanceStatsFor(m.id) }))
+      .sort((a,b) => a.m.name.localeCompare(b.m.name));
+
+    if(rows.length === 0){
+      wrap.innerHTML = '<div class="empty-state">No one matches that search.</div>';
+      return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'ledger';
+    table.innerHTML = `
+      <thead><tr>
+        <th>Name</th><th>Group</th><th>Phone</th><th>Joined</th><th>Attended</th><th>Last seen</th><th>Action</th>
+      </tr></thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector('tbody');
+    rows.forEach(({m, count, lastSeen}) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(m.name)}</td>
+        <td><span class="roster-group ${m.visitor ? 'visitor' : ''}">${escapeHtml(m.group)}</span></td>
+        <td data-label="Phone">${escapeHtml(m.phone || '—')}</td>
+        <td class="num" data-label="Joined">${escapeHtml(m.joined || '—')}</td>
+        <td class="num" data-label="Attended">${count}×</td>
+        <td class="num" data-label="Last seen">${lastSeen ? escapeHtml(lastSeen) : '—'}</td>
+        <td><button class="btn btn-danger del-btn" data-id="${m.id}">Remove</button></td>
+      `;
+      tr.querySelector('.del-btn').addEventListener('click', () => deleteMember(m.id));
+      tbody.appendChild(tr);
+    });
+    wrap.innerHTML = '';
+    wrap.appendChild(table);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Init ----------
+  loadAll();
+  renderCheckin();
+})();
+</script>
+</body>
+</html>
